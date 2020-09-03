@@ -4,7 +4,11 @@ ADB，即 [Android Debug Bridge](https://developer.android.com/studio/command-li
 
 持续更新中，欢迎提 PR 和 Issue 补充指正，觉得有用的可以将 [此 GitHub 仓库](https://github.com/mzlogin/awesome-adb) Star 收藏备用。
 
-**注：** 有部分命令的支持情况可能与 Android 系统版本及定制 ROM 的实现有关。
+给本项目提建议和意见，或想与我交流，可关注微信公众号「闷骚的程序员」：
+
+<img src="https://cdn.jsdelivr.net/gh/mzlogin/mzlogin.github.io/assets/images/qrcode.jpg" style="width:120px;height:120px;" >
+
+**注：** 文中有部分命令的支持情况可能与 Android 系统版本及定制 ROM 的实现有关。
 
 Other languages: [:gb: English](./README.en.md)
 
@@ -656,16 +660,18 @@ adb shell pm clear com.qihoo360.mobilesafe
 命令：
 
 ```sh
-adb shell dumpsys activity activities | grep mFocusedActivity
+adb shell dumpsys activity activities | grep mResumedActivity
 ```
 
 输出示例：
 
 ```sh
-mFocusedActivity: ActivityRecord{8079d7e u0 com.cyanogenmod.trebuchet/com.android.launcher3.Launcher t42}
+mResumedActivity: ActivityRecord{8079d7e u0 com.cyanogenmod.trebuchet/com.android.launcher3.Launcher t42}
 ```
 
 其中的 `com.cyanogenmod.trebuchet/com.android.launcher3.Launcher` 就是当前处于前台的 Activity。
+
+*在 Windows 下以上命令可能不可用，可以尝试 `adb shell dumpsys activity activities | findstr mResumedActivity` 或 `adb shell "dumpsys activity activities | grep mResumedActivity"`。*
 
 ### 查看正在运行的 Services
 
@@ -826,6 +832,7 @@ package:/data/app/ecarx.weather-1.apk
 | `--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]` | long 数组                              |
 
 ### 启动应用/ 调起 Activity
+> 指定Activity名称启动
 
 命令格式：
 
@@ -846,6 +853,21 @@ adb shell am start -n org.mazhuang.boottimemeasure/.MainActivity --es "toast" "h
 ```
 
 表示调起 `org.mazhuang.boottimemeasure/.MainActivity` 并传给它 string 数据键值对 `toast - hello, world`。
+
+> 不指定Activity名称启动（启动主Activity）
+
+命令格式：
+
+```sh
+adb shell monkey -p <packagename> -c android.intent.category.LAUNCHER 1
+```
+例如：
+
+```sh
+adb shell monkey -p com.tencent.mm -c android.intent.category.LAUNCHER 1
+```
+
+表示调起微信主界面。
 
 ### 调起 Service
 
@@ -2131,6 +2153,23 @@ network={
 ```
 
 `ssid` 即为我们在 WLAN 设置里看到的名称，`psk` 为密码，`key_mgmt` 为安全加密方式。
+
+如果 Android O 或以后，WiFi 密码保存的地址有变化，是在 `WifiConfigStore.xml` 里面
+
+```sh
+adb shell
+su
+cat /data/misc/wifi/WifiConfigStore.xml
+```
+
+输出格式：
+
+数据项较多，只需关注 `ConfigKey`（WiFi 名字）和 `PreSharedKey`（WiFi 密码）即可
+
+```xml
+<string name="ConfigKey">&quot;Wi-Fi&quot;WPA_PSK</string>
+<string name="PreSharedKey">&quot;931907334&quot;</string>
+```
 
 ### 设置系统日期和时间
 
